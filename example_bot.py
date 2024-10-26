@@ -2,21 +2,24 @@
 import logging
 
 import discord
+from discord.ext.commands import Bot
+
 
 from services import external_lending_requests, external_user_requests
+from commands import Lender
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = discord.Client(intents=intents)
+bot = Bot(intents=intents)
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'We have logged in as {bot.user}')
 
-@client.event
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == bot.user:
         return
 
     if message.content.startswith('$hello'):
@@ -30,4 +33,5 @@ async def on_message(message):
         print("-----------------------------------------------------------")
         await message.channel.send('Hello!')
 
-client.run('', log_level=logging.DEBUG)
+bot.add_cog(Lender(bot))
+bot.run('', log_level=logging.DEBUG)
