@@ -1,7 +1,9 @@
+from typing import Optional
+
 import discord
 from discord.ext import commands
 
-from services import external_lending_requests, external_user_requests
+from services import external_lending_requests, external_user_requests, external_card_info_requests
 
 class Lender(commands.Cog):
     def __init__(self, bot):
@@ -36,3 +38,17 @@ class Lender(commands.Cog):
         external_lending_requests.getListCardsBorrowedByUser(userID)
         return
 
+    @commands.command()
+    async def searchScryfallCards(self, ctx, *, args: Optional[str]):
+        if args is None:
+            print(external_card_info_requests.postCardInfoSearch(None, None, None,))
+            return
+        else:
+            passed_args = [None, None, None]
+            arguments = args.split(",")
+            current_arg = 0
+            while current_arg < len(arguments):
+                passed_args[current_arg] = arguments[current_arg]
+                current_arg += 1
+            print(external_card_info_requests.postCardInfoSearch(passed_args[0], passed_args[1], passed_args[2]))
+            return
