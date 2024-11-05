@@ -44,6 +44,23 @@ class Lender(commands.Cog):
         user_id = external_user_requests.getUserIdFromAPI(lender.id)
         lending_results = external_lending_requests.getListCardsLentByOwner(user_id)
 
+        if len(lending_results) == 0:
+            return
+
+        async def get_page(page: int):
+            current_result = lending_results[page - 1]
+            emb = discord.Embed(title="List of Cards Lent Out", description=f"<@{current_result["owner_id"]}>")
+            emb.add_field(name="Borrowed By", value=f"<@{current_result["borrower_id"]}>")
+            emb.add_field(name=current_result["card_name"], value=current_result["card_set_code"].upper() + " " + current_result["card_number"], inline=False)
+            emb.add_field(name="Number of Copies", value=current_result["count"], inline=False)
+            emb.set_image(
+                url=current_result["card_image_url"])
+            emb.set_author(name=f"Requested by {ctx.author}")
+            emb.set_footer(text=f"Result {page} of {len(lending_results)}")
+            return emb, current_result["id"], len(lending_results)
+
+        await selection_menu.SelectionMenu(ctx, get_page, False, None).navigate()
+
         return
 
     # use regular text command with params user to check borrowing list
@@ -52,21 +69,24 @@ class Lender(commands.Cog):
     async def listBorrowedCards(self, ctx, borrower: discord.Member):
         user_id = external_user_requests.getUserIdFromAPI(borrower.id)
         borrowing_results = external_lending_requests.getListCardsBorrowedByUser(user_id)
-        return
 
-    async def listCards(self, ctx, cards, usertext, user, title, desc):
+        if len(borrowing_results) == 0:
+            return
+
         async def get_page(page: int):
-            current_result = cards[page - 1]
-            emb = discord.Embed(title=title, description=desc)
-            emb.add_field(name=usertext, value=current_result["user_id"])
-            emb.add_field(name=current_result["name"], value=current_result["set_code"].upper() + " " + current_result["collector_number"], inline=False)
+            current_result = borrowing_results[page - 1]
+            emb = discord.Embed(title="List of Cards Borrowed", description=f"<@{current_result["borrower_id"]}>")
+            emb.add_field(name="Borrowed From", value=f"<@{current_result["owner_id"]}>")
+            emb.add_field(name=current_result["card_name"], value=current_result["card_set_code"].upper() + " " + current_result["card_number"], inline=False)
+            emb.add_field(name="Number of Copies", value=current_result["count"], inline=False)
             emb.set_image(
                 url=current_result["card_image_url"])
             emb.set_author(name=f"Requested by {ctx.author}")
-            emb.set_footer(text=f"Result {page} of {len(cards)}")
-            return emb, current_result["id"], len(cards)
+            emb.set_footer(text=f"Result {page} of {len(borrowing_results)}")
+            return emb, current_result["id"], len(borrowing_results)
 
         await selection_menu.SelectionMenu(ctx, get_page, False, None).navigate()
+        return
 
     async def searchScryfallCards(self, ctx, result_operation: Callable, search_string: Optional[str]):
         card_search_results = []
