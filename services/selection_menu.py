@@ -26,11 +26,8 @@ class SelectionMenu(discord.ui.View):
 
     async def navigate(self):
         emb, current_card_id, self.total_pages = await self.get_page(self.index)
-        if self.total_pages == 1:
-            await self.ctx.send(embed=emb)
-        elif self.total_pages > 1:
-            self.update_buttons()
-            await self.ctx.send(embed=emb, view=self)
+        self.update_buttons()
+        await self.ctx.send(embed=emb, view=self)
 
     async def get_current_card_id(self, interaction: discord.Interaction):
         emb, current_card_id, self.total_pages = await self.get_page(self.index)
