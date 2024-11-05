@@ -1,4 +1,8 @@
+import os
+from dotenv import load_dotenv
 import requests
+
+load_dotenv()
 
 def postLendCardFromOwnerToUser(ownerId, borrowerId, cardId, count):
      requestParams = {
@@ -7,7 +11,7 @@ def postLendCardFromOwnerToUser(ownerId, borrowerId, cardId, count):
          "card_id": cardId,
          "count": count
      }
-     lendCardResponse = requests.request('POST', 'http://localhost:8080/lending/lend', json=requestParams)
+     lendCardResponse = requests.request('POST', os.getenv('BACKEND_API_URL') + '/lending/lend', json=requestParams)
      print(lendCardResponse.status_code)
      if lendCardResponse.status_code == 200:
          return lendCardResponse.text
@@ -21,7 +25,7 @@ def postReturnCardFromUserToOwner(ownerId, borrowerId, cardId, count):
         "card_id": cardId,
         "count": count
     }
-    lendCardResponse = requests.request('POST', 'http://localhost:8080/lending/return', json=requestParams)
+    lendCardResponse = requests.request('POST', os.getenv('BACKEND_API_URL') + '/lending/return', json=requestParams)
     print(lendCardResponse.status_code)
     if lendCardResponse.status_code == 200:
         return lendCardResponse.text
@@ -29,7 +33,7 @@ def postReturnCardFromUserToOwner(ownerId, borrowerId, cardId, count):
         raise Exception('lend card failed')
 
 def getListCardsLentByOwner(ownerId):
-    lentCardsResponse = requests.request('GET', 'http://localhost:8080/lending/lentCards/' + str(ownerId))
+    lentCardsResponse = requests.request('GET', os.getenv('BACKEND_API_URL') + '/lending/lentCards/' + str(ownerId))
     print(lentCardsResponse.status_code)
     if lentCardsResponse.status_code == 200:
         print(lentCardsResponse.json())
@@ -39,7 +43,7 @@ def getListCardsLentByOwner(ownerId):
 
 
 def getListCardsBorrowedByUser(borrowerId):
-    borrowedCardsResponse = requests.request('GET', 'http://localhost:8080/lending/borrowedCards/' + str(borrowerId))
+    borrowedCardsResponse = requests.request('GET', os.getenv('BACKEND_API_URL') + '/lending/borrowedCards/' + str(borrowerId))
     print(borrowedCardsResponse.status_code)
     if borrowedCardsResponse.status_code == 200:
         print(borrowedCardsResponse.json())
