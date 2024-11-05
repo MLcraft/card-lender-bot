@@ -3,10 +3,11 @@ from typing import Optional, Callable
 import discord
 from discord.ext import commands
 
-class Pagination(discord.ui.View):
-    def __init__(self, ctx: commands.Context, get_page: Callable):
+class SelectionMenu(discord.ui.View):
+    def __init__(self, ctx: commands.Context, get_page: Callable, result_operation: Callable):
         self.ctx = ctx
         self.get_page = get_page
+        self.result_operation = result_operation
         self.total_pages: Optional[int] = None
         self.index = 1
         super().__init__(timeout=100)
@@ -23,25 +24,37 @@ class Pagination(discord.ui.View):
             return False
 
     async def navigate(self):
-        emb, self.total_pages = await self.get_page(self.index)
+        emb, current_card_id, self.total_pages = await self.get_page(self.index)
         if self.total_pages == 1:
             await self.ctx.send(embed=emb)
         elif self.total_pages > 1:
             self.update_buttons()
             await self.ctx.send(embed=emb, view=self)
 
+    async def get_current_card_id(self, interaction: discord.Interaction):
+        emb, current_card_id, self.total_pages = await self.get_page(self.index)
+        return current_card_id
+
     async def edit_page(self, interaction: discord.Interaction):
-        emb, self.total_pages = await self.get_page(self.index)
+        emb, current_card_id, self.total_pages = await self.get_page(self.index)
         self.update_buttons()
         await interaction.response.edit_message(embed=emb, view=self)
 
     def update_buttons(self):
         if self.index > self.total_pages // 2:
-            self.children[2].emoji = "⏮️"
+            self.children[3].emoji = "⏮️"
         else:
-            self.children[2].emoji = "⏭️"
-        self.children[0].disabled = self.index == 1
-        self.children[1].disabled = self.index == self.total_pages
+            self.children[3].emoji = "⏭️"
+        self.children[1].disabled = self.index == 1
+        self.children[2].disabled = self.index == self.total_pages
+
+    @discord.ui.button(emoji="✅", style=discord.ButtonStyle.blurple)
+    async def select(self, interaction: discord.Interaction, button: discord.Button):
+        card_id = await self.get_current_card_id(interaction)
+        await self.result_operation(card_id)
+
+        emb = discord.Embed(title="Selection Complete", description="Successfully completed request")
+        await interaction.response.edit_message(embed=emb, view=self)
 
     @discord.ui.button(emoji="◀️", style=discord.ButtonStyle.blurple)
     async def previous(self, interaction: discord.Interaction, button: discord.Button):
