@@ -4,49 +4,49 @@ import requests
 
 load_dotenv()
 
-def postLendCardFromOwnerToUser(ownerId, borrowerId, cardId, count):
-     requestParams = {
-         "owner_id": ownerId,
-         "borrower_id": borrowerId,
-         "card_id": cardId,
+def postLendCardFromOwnerToUser(owner_id, borrower_id, card_id, count):
+     request_params = {
+         "owner_id": owner_id,
+         "borrower_id": borrower_id,
+         "card_id": card_id,
          "count": count
      }
-     lendCardResponse = requests.request('POST', os.getenv('BACKEND_API_URL') + '/lending/lend', json=requestParams)
-     print(lendCardResponse.status_code)
-     if lendCardResponse.status_code == 200:
-         return lendCardResponse.text
+     lend_card_response = requests.request('POST', os.getenv('BACKEND_API_URL') + '/lending/lend', json=request_params)
+     print(lend_card_response.status_code)
+     if lend_card_response.status_code == 200:
+         return lend_card_response.text
      else:
          raise Exception('lend card failed')
 
-def postReturnCardFromUserToOwner(ownerId, borrowerId, cardId, count):
-    requestParams = {
-        "owner_id": ownerId,
-        "borrower_id": borrowerId,
-        "card_id": cardId,
+def postReturnCardFromUserToOwner(owner_id, borrower_id, card_id, count):
+    request_params = {
+        "owner_id": owner_id,
+        "borrower_id": borrower_id,
+        "card_id": card_id,
         "count": count
     }
-    lendCardResponse = requests.request('POST', os.getenv('BACKEND_API_URL') + '/lending/return', json=requestParams)
-    print(lendCardResponse.status_code)
-    if lendCardResponse.status_code == 200:
-        return lendCardResponse.text
+    lend_card_response = requests.request('POST', os.getenv('BACKEND_API_URL') + '/lending/return', json=request_params)
+    print(lend_card_response.status_code)
+    if lend_card_response.status_code == 200:
+        return lend_card_response.text
     else:
         raise Exception('lend card failed')
 
-def getListCardsLentByOwner(ownerId):
-    lentCardsResponse = requests.request('GET', os.getenv('BACKEND_API_URL') + '/lending/lentCards/' + str(ownerId))
-    print(lentCardsResponse.status_code)
-    if lentCardsResponse.status_code == 200:
-        print(lentCardsResponse.json())
-        return lentCardsResponse.json()
+def getListCardsLentByOwner(owner_id):
+    lent_cards_response = requests.request('GET', os.getenv('BACKEND_API_URL') + '/lending/lentCards/' + str(owner_id))
+    print(lent_cards_response.status_code)
+    if lent_cards_response.status_code == 200:
+        print(lent_cards_response.json())
+        return lent_cards_response.json()
     else:
         raise Exception('getListCardsLentByOwner failed')
 
 
-def getListCardsBorrowedByUser(borrowerId):
-    borrowedCardsResponse = requests.request('GET', os.getenv('BACKEND_API_URL') + '/lending/borrowedCards/' + str(borrowerId))
-    print(borrowedCardsResponse.status_code)
-    if borrowedCardsResponse.status_code == 200:
-        print(borrowedCardsResponse.json())
-        return borrowedCardsResponse.json()
+def getListCardsBorrowedByUser(borrower_id):
+    borrowed_cards_response = requests.request('GET', os.getenv('BACKEND_API_URL') + '/lending/borrowedCards/' + str(borrower_id))
+    print(borrowed_cards_response.status_code)
+    if borrowed_cards_response.status_code == 200:
+        print(borrowed_cards_response.json())
+        return borrowed_cards_response.json()
     else:
         raise Exception('getListCardsBorrowedByUser failed')

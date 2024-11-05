@@ -41,42 +41,57 @@ class Lender(commands.Cog):
     # default current user if none provided
     @commands.command()
     async def listLentCards(self, ctx, lender: discord.Member):
-        userID = external_user_requests.getUserIdFromAPI(lender.id)
-        external_lending_requests.getListCardsLentByOwner(userID)
+        user_id = external_user_requests.getUserIdFromAPI(lender.id)
+        lending_results = external_lending_requests.getListCardsLentByOwner(user_id)
+
         return
 
     # use regular text command with params user to check borrowing list
     # default current user if none provided
     @commands.command()
     async def listBorrowedCards(self, ctx, borrower: discord.Member):
-        userID = external_user_requests.getUserIdFromAPI(borrower.id)
-        external_lending_requests.getListCardsBorrowedByUser(userID)
+        user_id = external_user_requests.getUserIdFromAPI(borrower.id)
+        borrowing_results = external_lending_requests.getListCardsBorrowedByUser(user_id)
         return
 
-    async def searchScryfallCards(self, ctx, resultOperation: Callable, searchString: Optional[str]):
-        cardSearchResults = []
-        if searchString is None:
-            cardSearchResults = external_card_info_requests.postCardInfoSearch(None, None, None,)
+    async def listCards(self, ctx, cards, usertext, user, title, desc):
+        async def get_page(page: int):
+            current_result = cards[page - 1]
+            emb = discord.Embed(title=title, description=desc)
+            emb.add_field(name=usertext, value=current_result["user_id"])
+            emb.add_field(name=current_result["name"], value=current_result["set_code"].upper() + " " + current_result["collector_number"], inline=False)
+            emb.set_image(
+                url=current_result["card_image_url"])
+            emb.set_author(name=f"Requested by {ctx.author}")
+            emb.set_footer(text=f"Result {page} of {len(cards)}")
+            return emb, current_result["id"], len(cards)
+
+        await selection_menu.SelectionMenu(ctx, get_page, False, None).navigate()
+
+    async def searchScryfallCards(self, ctx, result_operation: Callable, search_string: Optional[str]):
+        card_search_results = []
+        if search_string is None:
+            card_search_results = external_card_info_requests.postCardInfoSearch(None, None, None,)
         else:
             passed_args = [None, None, None]
-            arguments = searchString.split(",")
+            arguments = search_string.split(",")
             current_arg = 0
             while current_arg < len(arguments):
                 passed_args[current_arg] = arguments[current_arg]
                 current_arg += 1
-            cardSearchResults = external_card_info_requests.postCardInfoSearch(passed_args[0], passed_args[1], passed_args[2])
+            card_search_results = external_card_info_requests.postCardInfoSearch(passed_args[0], passed_args[1], passed_args[2])
 
-        if len(cardSearchResults) == 0:
+        if len(card_search_results) == 0:
             return
 
         async def get_page(page: int):
-            currentResult = cardSearchResults[page - 1]
-            emb = discord.Embed(title="Search Results for Query", description=searchString)
-            emb.add_field(name=currentResult["name"], value=currentResult["set_code"].upper() + " " + currentResult["collector_number"], inline=False)
+            current_result = card_search_results[page - 1]
+            emb = discord.Embed(title="Search Results for Query", description=search_string)
+            emb.add_field(name=current_result["name"], value=current_result["set_code"].upper() + " " + current_result["collector_number"], inline=False)
             emb.set_image(
-                url=currentResult["card_image_url"])
+                url=current_result["card_image_url"])
             emb.set_author(name=f"Requested by {ctx.author}")
-            emb.set_footer(text=f"Result {page} of {len(cardSearchResults)}")
-            return emb, currentResult["id"], len(cardSearchResults)
+            emb.set_footer(text=f"Result {page} of {len(card_search_results)}")
+            return emb, current_result["id"], len(card_search_results)
 
-        await selection_menu.SelectionMenu(ctx, get_page, resultOperation).navigate()
+        await selection_menu.SelectionMenu(ctx, get_page, True, result_operation).navigate()

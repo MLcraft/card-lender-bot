@@ -4,8 +4,9 @@ import discord
 from discord.ext import commands
 
 class SelectionMenu(discord.ui.View):
-    def __init__(self, ctx: commands.Context, get_page: Callable, result_operation: Callable):
+    def __init__(self, ctx: commands.Context, get_page: Callable, is_request, result_operation: Optional[Callable]):
         self.ctx = ctx
+        self.is_request = is_request or False
         self.get_page = get_page
         self.result_operation = result_operation
         self.total_pages: Optional[int] = None
@@ -41,6 +42,8 @@ class SelectionMenu(discord.ui.View):
         await interaction.response.edit_message(embed=emb, view=self)
 
     def update_buttons(self):
+        if not self.is_request:
+            self.children[0].disabled = True
         if self.index > self.total_pages // 2:
             self.children[3].emoji = "⏮️"
         else:
