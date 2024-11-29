@@ -1,11 +1,9 @@
 # MTGLoanBot
 
----
 ### A Discord bot to keep track of card loans between friends for the Magic: The Gathering trading card game
 
 ## Add the bot to your server: [<img src="https://gist.github.com/cxmeel/0dbc95191f239b631c3874f4ccf114e2/raw/discord-icon.svg" alt="Invite the bot to your server!" height="24" />](https://discord.com/oauth2/authorize?client_id=1287629937578213429&permissions=1689917160151104&scope=bot)
 
----
 ## Build and Run Instructions
 Make sure the backend API is running on `localhost:8080` 
 
@@ -16,8 +14,6 @@ Add `BACKEND_API_URL` and `DISCORD_BOT_TOKEN` to your environment variables (can
 Run `pip install -r requirements.txt` to resolve packages
 
 Once configured, run `python3 bot.py` to activate the bot
-
----
 
 ## Commands
 
